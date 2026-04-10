@@ -1,3 +1,6 @@
+//John Speer
+//4/10/26
+//Client to send messages to and from the server and client
 package com.example;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -5,8 +8,11 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-
-
+import javax.swing.*;
+import java.util.Scanner;
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent; 
 public class SocketClientExample {
 	
 	
@@ -20,21 +26,18 @@ public class SocketClientExample {
 	 *  ****HINT**** you may wish to have a thread be in charge of sending information 
 	 *  and another thread in charge of receiving information.
 	*/
+    //pre condition : socket client is initialized
+    //post condition: shows the GUI and connects to a port to recieve messages
     public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException, InterruptedException{
-        //get the localhost IP address, if server is running on some other IP, you need to use that
+        
         InetAddress host = InetAddress.getLocalHost();
-        Socket socket = null;
-        ObjectOutputStream oos = null;
-        ObjectInputStream ois = null;
-        for(int i=0; i<5;i++){
-            //establish socket connection to server
-            socket = new Socket(host.getHostName(), 9876);
-            //write to socket using ObjectOutputStream
-            oos = new ObjectOutputStream(socket.getOutputStream());
+        Socket socket = new Socket(host.getHostName(),9876);
+        ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+
+
+            
             System.out.println("Sending request to Socket Server");
-            if(i==4)oos.writeObject("exit");
-            else oos.writeObject(""+i);
-            //read the server response message
             ois = new ObjectInputStream(socket.getInputStream());
             String message = (String) ois.readObject();
             System.out.println("Message: " + message);
@@ -42,6 +45,45 @@ public class SocketClientExample {
             ois.close();
             oos.close();
             Thread.sleep(100);
+        
+        JFrame frame=new JFrame("TextBoxes");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(300,300);
+        frame.setLayout(new FlowLayout());
+        JTextField text1=new JTextField(100);
+        JTextField text2=new JTextField(100);
+        text1.addActionListener(new ActionListener() {
+
+            //pre condition: the enter key is inputted
+            //post condition: text of text1 is sent to the server
+            @Override
+            public void actionPerformed(ActionEvent e){
+            String line=text1.getText();
+            //establish socket connection to server
+            try{
+                oos.writeObject(line);
+                oos.flush();}
+            catch(IOException e1){
+                e1.printStackTrace();
+            }
+                
+            }
+            
+        });
+        frame.add(text1);
+        frame.add(text2);
+        
+         // Your logic here
+        frame.setVisible(true);
+        //get the localhost IP address, if server is running on some other IP, you need to use that
+        
+        Scanner input=new Scanner(System.in);
+  
+        while(true){
+            text2.setText(text2.getText()+"\n\n"+ois.readObject());
+
         }
+            
+        
     }
 }

@@ -43,10 +43,11 @@ public class SocketServerExample {
             oos.close();
             socket.close();
             //terminate the server if client sends exit request
+            
             if(message.equalsIgnoreCase("exit")) break;
         }
         System.out.println("Shutting down Socket server!!");
-        //close the ServerSocket object
+        //case the ServerSocket object
         server.close();
     }
     
